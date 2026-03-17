@@ -76,12 +76,12 @@ func DeleteAthlete(id string) error {
 
 	res, err := Instance.Exec("delete from athletes where id=?", id)
 	if err != nil {
-		return fmt.Errorf("GetAthleteById(db): %v", err)
+		return fmt.Errorf("DeleteAthlete(db): %v", err)
 	}
 
 	affected, err := res.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("GetAthleteById(db): %v", err)
+		return fmt.Errorf("DeleteAthlete(db): %v", err)
 	}
 
 	if affected == 0 {

@@ -108,10 +108,10 @@ func PostAthletes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errors := validateAthlete(athlete)
+	errs := validateAthlete(athlete)
 
-	if len(errors) > 0 {
-		serializedErrors, err := json.Marshal(errors)
+	if len(errs) > 0 {
+		serializedErrors, err := json.Marshal(errs)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(w, "There were errors, but we failed to serialize them for you :(", http.StatusInternalServerError)
