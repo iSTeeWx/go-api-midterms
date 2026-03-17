@@ -55,7 +55,7 @@ func GetJudges(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", serialized)
 }
 
-func validateJudge(judge models.JudgeWithPassword) []string {
+func validateJudge(judge models.Judge) []string {
 	errors := []string{}
 
 	if judge.Name == nil {
@@ -120,7 +120,7 @@ func validateJudge(judge models.JudgeWithPassword) []string {
 }
 
 func PostJudge(w http.ResponseWriter, r *http.Request) {
-	var judge models.JudgeWithPassword
+	var judge models.Judge
 
 	err := json.NewDecoder(r.Body).Decode(&judge)
 	if err != nil {

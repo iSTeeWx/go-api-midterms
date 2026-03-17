@@ -59,7 +59,7 @@ func GetJudgeWithName(name string) (*models.Judge, error) {
 	return &judge, nil
 }
 
-func PostJudge(judge models.JudgeWithPassword) error {
+func PostJudge(judge models.Judge) error {
 	_, err := Instance.Exec("insert into judges (id,name,password,phone,experience_years) values (?,?,?,?,?)",
 		judge.Id, judge.Name, judge.Password, judge.Phone, judge.ExperienceYears)
 
