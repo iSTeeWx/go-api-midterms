@@ -14,7 +14,7 @@ func GetJudges(page *int) ([]models.Judge, error) {
 	var err error
 
 	if page != nil {
-		rows, err = Instance.Query("select id,name,phone,experience_years from judges limit ?,10", (*page - 1) * 10)
+		rows, err = Instance.Query("select id,name,phone,experience_years from judges limit ?,10", (*page-1)*10)
 	} else {
 		rows, err = Instance.Query("select id,name,phone,experience_years from judges")
 	}
@@ -43,17 +43,21 @@ func GetJudges(page *int) ([]models.Judge, error) {
 	return judges, nil
 }
 
-func GetJudgeWithName(name string) (*models.Judge, error) {
+func GetJudgeWithName(name string, password bool) (*models.Judge, error) {
 	var judge models.Judge
 
-	row := Instance.QueryRow("select id,name,phone,experience_years from judges where name=?", name)
-	err := row.Scan(&judge.Id, &judge.Name, &judge.Phone, &judge.ExperienceYears)
+	row := Instance.QueryRow("select id,name,password,phone,experience_years from judges where name=?", name)
+	err := row.Scan(&judge.Id, &judge.Name, &judge.Password, &judge.Phone, &judge.ExperienceYears)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("GetJudges(db): %v", err)
+	}
+
+	if !password {
+		judge.Password = nil
 	}
 
 	return &judge, nil

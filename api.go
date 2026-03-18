@@ -32,6 +32,8 @@ func main() {
 	http.HandleFunc("GET /judges/{id}/matches/{$}", app.GetMatchesOfJudge)
 	http.HandleFunc("DELETE /matches/{id}/{$}", app.DeleteMatch)
 
+	http.HandleFunc("POST /login/{$}", app.Login)
+
 	const host = "localhost:8080"
 
 	fmt.Printf("Starting server on %v\n", host)

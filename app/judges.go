@@ -6,6 +6,7 @@ import (
 	"errors"
 	"examblanc/db"
 	"examblanc/models"
+	"examblanc/utils"
 	"fmt"
 	"io"
 	"net/http"
@@ -149,7 +150,7 @@ func PostJudge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exist, err := db.GetJudgeWithName(*judge.Name)
+	exist, err := db.GetJudgeWithName(*judge.Name, false)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Failed to verify unicity of judges name", http.StatusInternalServerError)
@@ -209,9 +210,36 @@ func GetJudge(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteJudge(w http.ResponseWriter, r *http.Request) {
-
 	id := r.PathValue("id")
-	err := db.DeleteJudge(id)
+
+	tokenString := r.Header.Get("Authorization")
+	name, err := utils.VerifyJWT(tokenString)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	judge, err := db.GetJudgeWithName(name, false)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Could not verify your identity", http.StatusUnauthorized)
+		return
+	}
+
+	if judge == nil {
+		fmt.Println(err)
+		http.Error(w, "Token matches no judge", http.StatusUnauthorized)
+		return
+	}
+
+	if *judge.Id != id {
+		fmt.Println(err)
+		http.Error(w, "Your token is not that of the target judge", http.StatusUnauthorized)
+		return
+	}
+
+	err = db.DeleteJudge(id)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

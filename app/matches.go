@@ -6,6 +6,7 @@ import (
 	"errors"
 	"examblanc/db"
 	"examblanc/models"
+	"examblanc/utils"
 	"fmt"
 	"io"
 	"net/http"
@@ -160,17 +161,31 @@ func PostMatch(w http.ResponseWriter, r *http.Request) {
 func GetMatchesOfJudge(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
-	judge, err := db.GetJudge(id)
 
+	tokenString := r.Header.Get("Authorization")
+	name, err := utils.VerifyJWT(tokenString)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "Failed to fetch judges", http.StatusInternalServerError)
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	judge, err := db.GetJudgeWithName(name, false)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Could not verify your identity", http.StatusUnauthorized)
 		return
 	}
 
 	if judge == nil {
-		fmt.Println("No judge with such id")
-		http.Error(w, "No judge with such id", http.StatusNotFound)
+		fmt.Println(err)
+		http.Error(w, "Token matches no judge", http.StatusUnauthorized)
+		return
+	}
+
+	if *judge.Id != id {
+		fmt.Println(err)
+		http.Error(w, "Your token is not that of the target judge", http.StatusUnauthorized)
 		return
 	}
 
