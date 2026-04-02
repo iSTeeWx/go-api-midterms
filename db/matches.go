@@ -31,8 +31,8 @@ func GetCountMatchesBetweenAthletesInDay(athlete1 string, athlete2 string, day t
 	fmt.Println(start)
 	fmt.Println(end)
 
-	err := Instance.QueryRow("select count(id) from matches where athlete1_id=? and athlete2_id=? and date>=? and date<=?",
-		athlete1, athlete2, start, end).
+	err := Instance.QueryRow("select count(id) from matches where (athlete1_id=? and athlete2_id=?) or (athlete2_id=? and athlete1_id=?) and date>=? and date<=?",
+		athlete1, athlete2, athlete1, athlete2, start, end).
 		Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("GetCountMatchesBetweenAthletesInDay(db): %v", err)
@@ -45,7 +45,7 @@ func PostMatch(match models.Match) error {
 
 	_, err := Instance.Exec(`insert into matches
 													(id,athlete1_id,athlete2_id,judge_id,date,score1,score2)
-													value (?,?,?,?,?,?,?)`,
+													value (?,?,?,?,FROM_UNIXTIME(?),?,?)`,
 		*match.Id,
 		*match.Athlete1Id,
 		*match.Athlete2Id,
@@ -64,7 +64,7 @@ func PostMatch(match models.Match) error {
 func GetMatchesOfJudge(id string) ([]models.Match, error) {
 	matches := []models.Match{}
 
-	rows,err := Instance.Query("select id,athlete1_id,athlete2_id,judge_id,unix_timestamp(date) as date,score1,score2 from matches where judge_id=?", id)
+	rows, err := Instance.Query("select id,athlete1_id,athlete2_id,judge_id,unix_timestamp(date) as date,score1,score2 from matches where judge_id=?", id)
 	if err != nil {
 		return nil, fmt.Errorf("GetMatchesOfJudge(db): %v", err)
 	}
@@ -89,7 +89,6 @@ func GetMatchesOfJudge(id string) ([]models.Match, error) {
 		}
 		return nil, fmt.Errorf("GetMatchesOfJudge(db): %v", err)
 	}
-
 
 	return matches, nil
 }
